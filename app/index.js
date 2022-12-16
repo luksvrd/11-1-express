@@ -9,7 +9,18 @@ const app = express();
 const port = 3001;
 
 // this is a file that will be served up when the user goes to the root of the site.
-app.get("/api", (_, res) => {
+app.get("/api/terms", (_, res) => {
+  res.json(terms);
+});
+
+// TODO: add a route for /api/terms/:id so I can get back on specific term
+
+// the difference between '/' and '/:term' is that the ':' represents a dynamic parameter. (e.g. 'api/terms/Whatever)
+app.get("/api/terms/:term", (req, res) => {
+  // we can see the name of this parameter as a key in the req.params object
+  // TODO: get the desired term from the req.params object
+  const { terms } = req.params;
+  console.log(req.params);
   res.json(terms);
 });
 
