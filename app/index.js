@@ -9,8 +9,9 @@ const app = express();
 const port = 3001;
 
 // this is a file that will be served up when the user goes to the root of the site.
-app.get("/api", (req, res) => {
+app.get("/api", (_, res) => {
   res.json(terms);
 });
 
-app.listen(port, () => console.log(`Example app listening on port 3001!`));
+// using consloe.info instead of console.log because it's a more permanent log, saved in the console
+app.listen(port, () => console.info(`Example app listening on port 3001!`));
