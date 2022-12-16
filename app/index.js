@@ -11,28 +11,47 @@ const port = 3001;
 
 // TODO: Use Query Parameters to allow an option to SORT the terms asending or descending
 // this is a file that will be served up when the user goes to the root of the site.
-app.get("/api/terms", (_, res) => {
-  res.json(termsData);
+app.get("/api/terms", (req, res) => {
+  // 'req.query' is an object that comes from the '?student=josh'
+  // This will be either 'asc' or 'desc'
+  const { sort } = req.query;
+
+  let ret;
+
+  switch (sort) {
+    case "asc":
+      // a.term.localeCompare(b.term) will return a number. If a is greater than b, it will return a positive number. If a is less than b, it will return a negative number. If they are equal, it will return 0.
+      // this is sorting a to z
+      ret = termsData.sort((a, b) => a.term.localeCompare(b.term));
+      break;
+    case "desc":
+      // localeCompare is a method that will compare two strings and return a number. If the first string is greater than the second, it will return a positive number. If the first string is less than the second, it will return a negative number. If they are equal, it will return 0.
+      // This is sorting z to a
+      ret = termsData.sort((a, b) => b.term.localeCompare(a.term));
+      break;
+    default:
+      ret = termsData;
+  }
+
+  res.json(ret);
 });
 
-// TODO: add a route for /api/terms/:id so I can get back on specific term
+/ The ':' represents a DYNAMIC PARAMETER. (e.g. '/api/terms/WHATEVERIWANT')
+// We can see the name of this parameter as a key in the 'req.params.'
+app.get("/api/terms/:term", (req, res) => {
+  const { term } = req.params;
 
-// the difference between '/' and '/:term' is that the ':' represents a dynamic parameter. (e.g. 'api/terms/Whatever)
-app.get("/api/terms/:randomword", (req, res) => {
-  // we can see the name of this parameter as a key in the req.params object
-  // TODO: Find the desired term from the ARRAY of terms
-  const requestTerm = termsData.find((t) => {
-    t.term.toUpperCase() === term.toUpperCase();
-  });
+  const requestedTerm = termsData.find(
+    (t) => t.term.toUpperCase() === term.toUpperCase()
+  );
 
-  // TODO: if we find the term, send it back as JSON
-  // else, tell them we didn't find it
   if (requestedTerm) {
     res.json(requestedTerm);
   } else {
-    res.status(404).json({ message: "Term not found" });
+    res.status(404).json({ error: `Term ${term} not found. :(` });
   }
 });
 
-// using consloe.info instead of console.log because it's a more permanent log, saved in the console
-app.listen(port, () => console.info(`Example app listening on port 3001!`));
+app.listen(port, () => {
+  console.info("Server running on port 3001");
+});
