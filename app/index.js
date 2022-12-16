@@ -36,7 +36,7 @@ app.get("/api/terms", (req, res) => {
   res.json(ret);
 });
 
-/ The ':' represents a DYNAMIC PARAMETER. (e.g. '/api/terms/WHATEVERIWANT')
+// The ':' represents a DYNAMIC PARAMETER. (e.g. '/api/terms/WHATEVERIWANT')
 // We can see the name of this parameter as a key in the 'req.params.'
 app.get("/api/terms/:term", (req, res) => {
   const { term } = req.params;
