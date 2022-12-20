@@ -62,10 +62,6 @@ app.get("/api/pets", cors({ origin: "http://localhost:5173" }), (_, res) => {
   res.json(petsData);
 });
 
-app.listen(port, () => {
-  console.info("Server running on port 3001");
-});
-
 // TODO: GET request for reviews
 // "api/reviews" is the path that we're listening for it is a made up route that we're creating
 // localhost:5173 is the port that we're listening on and the path is the route that we're listening for. It is a security measure to prevent other people from accessing our data
@@ -74,9 +70,39 @@ app.get("/api/reviews", cors({ origin: "http://localhost:5173" }), (_, res) => {
 });
 
 // TODO: GET a single review
+app.get(
+  "/api/reviews/:id",
+  cors({ origin: "http://localhost:5173" }),
+  (req, res) => {
+    // the req.params object is a key/value pair of the dynamic parameters in the route ie. /api/reviews/:id
+    // Find the review whose 'review_id' that matches the id from the dynamic parameter in 'req.req.params'
+    const { id } = req.params;
+    const requestedReview = reviewsData.find((r) => r.review_id === id);
+    // TODO: If the review is not found, return a 404 status code and a JSON object with an error message.
+    if (requestedReview) {
+      res.json(requestedReview);
+    } else {
+      res.status(404).json({ error: `Review ${id} not found. :(` });
+    }
+  }
+);
 
 // TODO: GET request for a specific review's upvotes
 
 // TODO: POST request to add a review
+app.post(
+  "/api/reviews/:add",
+  cors({ origin: "http://localhost:5173" }),
+  (req, res) => {
+    const { add } = req.params;
+    const addReview = reviewsData.add((r) => r.review === add);
+    res.json(addReview);
+    console.log(addReview);
+  }
+);
 
 // TODO: PUT request to upvote a review
+
+app.listen(port, () => {
+  console.info("Server running on port 3001");
+});
