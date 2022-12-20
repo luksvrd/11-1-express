@@ -88,16 +88,31 @@ app.get(
 );
 
 // TODO: GET request for a specific review's upvotes
-
-// TODO: POST request to add a review
-app.post(
-  "/api/reviews/:add",
+app.get(
+  "/api/reviews/:id/upvotes",
   cors({ origin: "http://localhost:5173" }),
   (req, res) => {
-    const { add } = req.params;
-    const addReview = reviewsData.add((r) => r.review === add);
-    res.json(addReview);
-    console.log(addReview);
+    // the req.params object is a key/value pair of the dynamic parameters in the route ie. /api/reviews/:id
+    // Find the review whose 'review_id' that matches the id from the dynamic parameter in 'req.req.params'
+    const { id } = req.params;
+    const requestedReview = reviewsData.find((u) => u.review_id === id);
+    if (requestedReview) {
+      res.json({ upvotes: requestedReview.upvotes });
+    } else {
+      res.status(404).json({ error: `Review ${id} not found. :(` });
+    }
+  }
+);
+
+// TODO: POST request to add a review
+// the post request is a request that we're making to the server to add a review, it is a made up route that we're creating
+app.post(
+  "/api/reviews/",
+  cors({ origin: "http://localhost:5173" }),
+  (req, res) => {
+    console.log(req.body);
+
+    res.json({ message: "Review added successfully!" });
   }
 );
 
