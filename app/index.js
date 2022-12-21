@@ -9,7 +9,6 @@ import reviewsData from "./db/reviews.json" assert { type: "json" };
 // import the data from the json file. have to use the 'assert' syntax because we're importing a json file
 import termsData from "./db/terms.json" assert { type: "json" };
 // UUID is a library that will generate a unique ID for us
-import { v4 as uuidv4 } from "uuid";
 
 // Start express
 const app = express();
@@ -112,30 +111,38 @@ app.get(
 // This must be added before the post request
 app.use(express.json());
 
-app.post(
-  "/api/reviews/",
-  cors({ origin: "http://localhost:5173" }),
-  (req, res) => {
-    console.log(req.body, uuidv4());
-    const newReview = {
-      // Take all of the properties/values from the request body
-      // The spread operator (...) is a way to take all of the properties from an object and add them to a new object while keeping the original object intact
-      ...req.body,
-      // Add a new property called 'review_id' with a value of a new UUID
-      review_id: uuidv4(),
-      // Add a new property called 'upvotes' with a value of 0
-      upvotes: 0,
-    };
-    // TODO: verify that the request body has all of the required properties
-    // If not return a 400 status code and a JSON object with an error message. (Client error)
+// app.post(
+//   "/api/reviews/",
+//   cors({ origin: "http://localhost:5173" }),
+//   (req, res) => {
+//     console.log(req.body, uuidv4());
+//     const newReview = {
+//       // Take all of the properties/values from the request body
+//       // The spread operator (...) is a way to take all of the properties from an object and add them to a new object while keeping the original object intact
+//       ...req.body,
+//       // Add a new property called 'review_id' with a value of a new UUID
+//       review_id: uuidv4(),
+//       // Add a new property called 'upvotes' with a value of 0
+//       upvotes: 0,
+//     };
 
-    // TODO: use fs.writefile to write the new review to the reviews.json file
-    // if successful, return a 201 status code and a JSON object with a success message
-    // if unsuccessful, return a 500 status code and a JSON object with an error message. which means that the server has encountered a situation it doesn't know how to handle (not the client's fault)
+// TODO: verify that the request body has all of the required properties
+// If not return a 400 status code and a JSON object with an error message. (Client error)
+// Use this to create a new review
+app.post("/api/reviews", (req, res) => {
+  const { product, username, review } = req;
 
-    res.json({ message: "Review added successfully!" });
+  // TODO: Remove any properties from the body that don't belong
+  if (product && username && review) {
+    res.json({ message: "Review added!" });
+  } else {
+    res.status(400).json({ error: "Missing required properties" });
   }
-);
+
+  // TODO: use fs.writefile to write the new review to the reviews.json file
+  // if successful, return a 201 status code and a JSON object with a success message
+  // if unsuccessful, return a 500 status code and a JSON object with an error message. which means that the server has encountered a situation it doesn't know how to handle (not the client's fault)
+});
 
 // TODO: PUT request to upvote a review
 
