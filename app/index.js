@@ -4,11 +4,17 @@ import cors from "cors";
 import express from "express";
 
 import petsData from "./db/pets.json" assert { type: "json" };
-
-import reviewsData from "./db/reviews.json" assert { type: "json" };
 // import the data from the json file. have to use the 'assert' syntax because we're importing a json file
-import termsData from "./db/terms.json" assert { type: "json" };
+import reviewsData from "./db/reviews.json" assert { type: "json" };
 // UUID is a library that will generate a unique ID for us
+import { v4 as uuidv4 } from "uuid";
+import termsData from "./db/terms.json" assert { type: "json" };
+
+import { promises as fs } from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+
+console.log(path.dirname(fileURLToPath(import.meta.url)));
 
 // Start express
 const app = express();
@@ -111,40 +117,47 @@ app.get(
 // This must be added before the post request
 app.use(express.json());
 
-// app.post(
-//   "/api/reviews/",
-//   cors({ origin: "http://localhost:5173" }),
-//   (req, res) => {
-//     console.log(req.body, uuidv4());
-//     const newReview = {
-//       // Take all of the properties/values from the request body
-//       // The spread operator (...) is a way to take all of the properties from an object and add them to a new object while keeping the original object intact
-//       ...req.body,
-//       // Add a new property called 'review_id' with a value of a new UUID
-//       review_id: uuidv4(),
-//       // Add a new property called 'upvotes' with a value of 0
-//       upvotes: 0,
-//     };
-
-// TODO: verify that the request body has all of the required properties
-// If not return a 400 status code and a JSON object with an error message. (Client error)
-// Use this to create a new review
-app.post("/api/reviews", (req, res) => {
-  const { product, username, review } = req;
+// Post is used when we want to add data to the server, it is a made up route that we're creating
+app.post("/api/reviews", async (req, res) => {
+  const { product, username, review } = req.body;
 
   // TODO: Remove any properties from the body that don't belong
-  if (product && username && review) {
-    res.json({ message: "Review added!" });
-  } else {
-    res.status(400).json({ error: "Missing required properties" });
+  const newReview = {
+    ...req.body,
+    review_id: uuidv4(),
+    upvotes: 0,
+  };
+  // Try is a way to handle errors. If the code in the try block throws an error, the catch block will run
+  // Try is useful for asynchronous code because it will catch errors that are thrown asynchronously
+  try {
+    // TODO: Remove any properties from the body that don't belong
+    // this is a conditional statement that will check if the product, username, and review are true
+    if (product && username && review) {
+      await fs.writeFile(
+        `${path.dirname(fileURLToPath(import.meta.url))}/db/reviews.json`,
+        // null and 2 are used to format the JSON file for readability
+        JSON.stringify([...reviewsData, newReview], null, 2),
+        "utf-8"
+      );
+      // This status code means that the request was successful and a new resource was created
+      res.status(201).json({ status: "success", body: newReview });
+    } else {
+      // This status code means that the request was unsuccessful because the client didn't provide all of the required properties
+      res.status(400).json({ error: "Missing required properties" });
+    }
+    // a catch block will run if an error is thrown in the try block, it will return a 500 status code and a JSON object with an error message. The server caught the error and handled it
+  } catch (err) {
+    // This status code means that the request was unsuccessful because of an error on the server
+    res.status(500).json({ error: `Something went wrong. ${err.message}` });
   }
 
-  // TODO: use fs.writefile to write the new review to the reviews.json file
-  // if successful, return a 201 status code and a JSON object with a success message
-  // if unsuccessful, return a 500 status code and a JSON object with an error message. which means that the server has encountered a situation it doesn't know how to handle (not the client's fault)
+  // TODO: Use fs.writeFile to write the new review to the reviews.json file
+  // If successful, return a 201 status code with a message
+  // If unsuccessful, return a 500 status code with a message
 });
 
 // TODO: PUT request to upvote a review
+// Put is used when we want to update data on the server, it is a made up route that we're creating
 
 app.listen(port, () => {
   console.info("Server running on port 3001");
